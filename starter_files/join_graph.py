@@ -32,6 +32,18 @@ class JoinGraph:
             root of the join tree
         """
         # You must implement this function
+        # so a DP algorithm
+
+        dp = {}
+
+        # Base Case
+
+        for i in range(len(self.rels)):
+            dp[(i, i)] = JoinPlan(None, None, [self.rels[i]],
+                                  self.getCardinality([self.rels[i]]))
+
+        #
+
         pass
 
     def _load(self, lines: list) -> None:
