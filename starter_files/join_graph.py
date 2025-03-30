@@ -37,14 +37,75 @@ class JoinGraph:
         dp = {}
 
         # Base Case
+        length = len(self.rels)
 
-        for i in range(len(self.rels)):
+        for i in range(length):
             dp[(i, i)] = JoinPlan(None, None, [self.rels[i]],
                                   self.getCardinality([self.rels[i]]))
 
-        #
+        # now build case
+        for size in range(2, length + 1):
+            # print(i)
+            for j in range(0, length - size + 1):
 
-        pass
+                sizeJ = size + j - 1
+                minCost = 0
+                bestPlan = None
+
+                for k in range(j, sizeJ):
+                    if (j, k) not in dp or (k + 1, sizeJ) not in dp:
+                        continue
+                    leftChild = dp[(j, k)]
+                    rightChild = dp[(k + 1, sizeJ)]
+
+                    relationsToJoin = leftChild.rels + rightChild.rels
+
+                    # # constraints
+                    # # fullness
+                    # fullnessRels = self.rels[j:sizeJ + 1]
+                    # if len(relationsToJoin) != len(fullnessRels):
+                    #     continue
+
+                    # relations = set()
+                    # duplicates = False
+
+                    # for relation in relationsToJoin:
+                    #     if relation.idx in relations:
+                    #         duplicates = True
+                    #         break
+                    #     relations.add(relation.idx)
+                    # if duplicates:
+                    #     continue
+
+                    # # # cartestian
+
+                    # valid = True
+
+                    # for a in range(len(relationsToJoin) - 1):
+
+                    #     cartesianFree = False
+
+                    #     for cond in self.joinConditions:
+                    #         if (cond.primaryRel == relationsToJoin[a] and cond.foreignRel == relationsToJoin[a + 1] or (cond.foreignRel == relationsToJoin[a] and cond.primaryRel == relationsToJoin[a + 1])):
+                    #             cartesianFree = True
+                    #             break
+                    #     if not cartesianFree:
+                    #         valid = False
+                    #         break
+                    # if not valid:
+                    #     continue
+
+                    # right
+
+                    if rightChild.estOutCard > leftChild.estOutCard:
+                        leftChild, rightChild = rightChild, leftChild
+
+                    plan = JoinPlan(
+                        leftChild, rightChild, relationsToJoin, self.getCardinality(relationsToJoin))
+
+                    if (j, sizeJ) not in dp or plan.estCost < dp[(j, sizeJ)].estCost:
+                        dp[(j, sizeJ)] = plan
+        return dp[(0, length - 1)]
 
     def _load(self, lines: list) -> None:
         """
@@ -105,6 +166,9 @@ class JoinGraph:
             relation containing foreign key
         """
 
+        if len(inRels) == 1:
+            return inRels[0].cardinality
+
         numerator = 1
         denominator = 1
 
@@ -117,10 +181,10 @@ class JoinGraph:
 
             for condition in self.joinConditions:
                 if (condition.primaryRel == leftRel and condition.foreignRel == rightRel):
-                    denominator *= rightRel.cardinality
+                    denominator *= leftRel.cardinality
                     break
                 elif (condition.foreignRel == leftRel and condition.primaryRel == rightRel):
-                    denominator *= leftRel.cardinality
+                    denominator *= rightRel.cardinality
                     break
 
         return numerator // denominator
