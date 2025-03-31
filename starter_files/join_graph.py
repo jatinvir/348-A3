@@ -49,8 +49,6 @@ class JoinGraph:
             for j in range(0, length - size + 1):
 
                 sizeJ = size + j - 1
-                minCost = 0
-                bestPlan = None
 
                 for k in range(j, sizeJ):
                     if (j, k) not in dp or (k + 1, sizeJ) not in dp:
@@ -59,41 +57,6 @@ class JoinGraph:
                     rightChild = dp[(k + 1, sizeJ)]
 
                     relationsToJoin = leftChild.rels + rightChild.rels
-
-                    # # constraints
-                    # # fullness
-                    # fullnessRels = self.rels[j:sizeJ + 1]
-                    # if len(relationsToJoin) != len(fullnessRels):
-                    #     continue
-
-                    # relations = set()
-                    # duplicates = False
-
-                    # for relation in relationsToJoin:
-                    #     if relation.idx in relations:
-                    #         duplicates = True
-                    #         break
-                    #     relations.add(relation.idx)
-                    # if duplicates:
-                    #     continue
-
-                    # # # cartestian
-
-                    # valid = True
-
-                    # for a in range(len(relationsToJoin) - 1):
-
-                    #     cartesianFree = False
-
-                    #     for cond in self.joinConditions:
-                    #         if (cond.primaryRel == relationsToJoin[a] and cond.foreignRel == relationsToJoin[a + 1] or (cond.foreignRel == relationsToJoin[a] and cond.primaryRel == relationsToJoin[a + 1])):
-                    #             cartesianFree = True
-                    #             break
-                    #     if not cartesianFree:
-                    #         valid = False
-                    #         break
-                    # if not valid:
-                    #     continue
 
                     # right
 
